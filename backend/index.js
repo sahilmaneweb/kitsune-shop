@@ -1,25 +1,27 @@
-const express = require('express');
-const cors = require('cors');
-const productRoute = require('./router/productRouter');
-const userRoute = require('./router/userRouter');
-const cartRoute = require('./router/cartRouter');
-const orderRoute = require('./router/orderRouter');
-const mongoose = require('mongoose');
-const app = express();
-const port = 8080;
+import './config/envConfig.js';  // Load env variables FIRST
 
-mongoose.connect('mongodb://127.0.0.1:27017/kitsune-shop').then(()=>{
-        console.log("Mongodb connected");
-    }).catch((err) => {
-        console.log(err);
-    });
+import express, { json, urlencoded } from 'express';
+import cors from 'cors';
+import path from 'path';
+import ejs from 'ejs';
+import connectDB from './config/db.js';
+
+const app = express();
+const port = process.env.PORT || 8080;
+
+connectDB();
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({
-    extended : true
-}));
-app.use("/images",express.static('public/productImage'));
+app.use(json());
+app.use(urlencoded({ extended: true }));
+
+app.set("view engine", "ejs");
+app.set("views", path.join(process.cwd(), "views"));
+
+import productRoute from './router/productRouter.js';
+import userRoute from './router/userRouter.js';
+import cartRoute from './router/cartRouter.js';
+import orderRoute from './router/orderRouter.js';
 
 app.use("/product", productRoute);
 app.use("/user", userRoute);
@@ -27,10 +29,9 @@ app.use("/cart", cartRoute);
 app.use("/order", orderRoute);
 
 app.listen(port, (err) => {
-    if(err){
+    if (err) {
         console.log(err);
-    }else{
-        console.log("Server started succesfully on port 8080");
+    } else {
+        console.log("Server started successfully on port " + port);
     }
-    
-})
+});

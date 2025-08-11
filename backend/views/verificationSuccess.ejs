@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    .message { font-size: 20px; margin-bottom: 20px; }
+    .login-btn {
+      display: inline-block;
+      padding: 12px 30px;
+      background-color: #fa1919;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p class="message"><%= message %></p>
+  <a href="/login" class="login-btn">Login Now</a>
+</body>
+</html>

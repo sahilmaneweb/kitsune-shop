@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Email Verification</title>
+  <style>
+    body {
+      margin: 0; 
+      padding: 30px 10px; 
+      background: white; 
+      font-family: Arial, sans-serif;
+      -webkit-text-size-adjust: 100%; 
+      -ms-text-size-adjust: 100%;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 400px;
+    }
+    td {
+      text-align: center;
+      padding: 10px 0;
+      color: #555;
+    }
+    .brand {
+      font-weight: bold;
+      font-size: 28px;
+      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .message {
+      font-size: 18px;
+      color: #555;
+    }
+    .verify-button {
+      background-color: #fa1919;
+      color: white !important;
+      font-size: 20px;
+      padding: 12px 30px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+    }
+    .verify-button:hover {
+      background-color: #ff0000 !important;
+    }
+    img {
+      width: 60px;
+      height: 60px;
+      display: block;
+      margin: 0 auto;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation">
+    <tr>
+      <td>
+        <img src="https://i.postimg.cc/FsDMVHrS/kitsune-logo.png" alt="Kitsune Store Logo" />
+      </td>
+    </tr>
+    <tr>
+      <td class="brand">Kitsune Store</td>
+    </tr>
+    <tr>
+      <td class="message">
+        Here is your email verification page link:<br />
+        <strong><%= email %></strong>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="<%= verifyUrl %>" class="verify-button" target="_blank" rel="noopener noreferrer">Verify Here</a>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

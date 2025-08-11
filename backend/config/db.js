@@ -1,11 +1,14 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const connect = async() => {
-   return mongoose.connect('mongodb://localhost:27017/kitsune-shop').then(()=>{
+const dbUrl = process.env.DB_URL;
+
+const connectDB = async() => {
+    console.log(dbUrl);
+   return mongoose.connect(dbUrl).then(()=>{
         console.log("Mongodb connected");
     }).catch((err) => {
         console.log(err);
     });
 }
 
-module.exports = connect;
+export default connectDB;

@@ -1,11 +1,11 @@
-const express = require("express");
-const { allProduct, addProduct, removeProduct } = require("../controller/productController");
-const productRoute = express.Router();
-const upload = require('../config/fileConfig');
+import express from "express";
+import { allProduct, addProduct, removeProduct } from "../controller/productController.js";
+import upload from "../config/fileConfig.js";
 
+const productRoute = express.Router();
 
 productRoute.get("/allProduct", allProduct);
 productRoute.post("/addProduct", upload.single('product'), addProduct);
 productRoute.delete("/removeProduct/:id", removeProduct);
 
-module.exports = productRoute;
+export default productRoute;
