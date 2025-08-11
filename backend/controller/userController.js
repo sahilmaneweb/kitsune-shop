@@ -74,6 +74,7 @@ export const verifyUser = async (req, res) => {
       return res.status(400).render('verificationError', {
         title: 'Verification Failed',
         message: 'Invalid verification request.',
+        baseUrl: process.env.CLIENT_BASE_URL
       });
     }
 
@@ -86,6 +87,7 @@ export const verifyUser = async (req, res) => {
       return res.render('verificationSuccess', {
         title: 'Already Verified',
         message: 'You are already verified! Now login to our shop.',
+        baseUrl: process.env.CLIENT_BASE_URL
       });
     }
 
@@ -101,6 +103,7 @@ export const verifyUser = async (req, res) => {
     res.render('verificationSuccess', {
       title: 'Verification Successful',
       message: 'You are verified! Now login to our shop for shopping.',
+      baseUrl: process.env.CLIENT_BASE_URL
     });
 
   } catch (error) {
@@ -109,6 +112,7 @@ export const verifyUser = async (req, res) => {
       title: 'Server Error',
       message: 'Internal Server Error. Please try again later.',
       error: error.message || error,
+      baseUrl: process.env.CLIENT_BASE_URL
     });
   }
 };
