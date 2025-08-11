@@ -1,13 +1,19 @@
 import express from "express";
-import { getCart, addToCart, removeFromCart, incrememtProduct, clearCart } from "../controller/cartController.js";
-
+import { 
+  getCart, 
+  addToCart, 
+  removeFromCart, 
+  clearCart, 
+  updateCartQuantity 
+} from "../controller/cartController.js";
+import { userAuth } from "../middleware/userAuth.js";
 
 const cartRoute = express.Router();
 
-cartRoute.get("/getCart", getCart);
-cartRoute.post("/addToCart", addToCart);
-cartRoute.post("/clearCart", clearCart);
-cartRoute.post("/removeFromCart", removeFromCart);
-cartRoute.post("/incrementProduct", incrememtProduct);
+cartRoute.get("/getCart", userAuth, getCart);
+cartRoute.post("/addToCart", userAuth, addToCart);
+cartRoute.delete("/clearCart", userAuth, clearCart);
+cartRoute.delete("/removeFromCart", userAuth, removeFromCart);
+cartRoute.patch("/updateCartQuantity", userAuth, updateCartQuantity);
 
 export default cartRoute;

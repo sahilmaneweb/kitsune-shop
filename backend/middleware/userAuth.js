@@ -4,7 +4,7 @@ const JWT_KEY = process.env.USER_JWT_KEY;
 const SERVER_URL = process.env.SERVER_URL || "http://localhost:8080";
 
 export const createUserToken = (payload) => {
-    const token = jwt.sign(payload, JWT_KEY, { expiresIn: "1h" });
+    const token = jwt.sign(payload, JWT_KEY, { expiresIn: "3h" });
     return `Bearer ${token}`;
 };
 

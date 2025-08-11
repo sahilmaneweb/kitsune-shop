@@ -3,22 +3,40 @@
 <head>
   <title><%= title %></title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    .message { font-size: 20px; margin-bottom: 20px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f0fff0;
+      color: #2d572c;
+    }
+    h1 {
+      color: #28a745;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    .message {
+      font-size: 20px;
+      margin-bottom: 25px;
+    }
     .login-btn {
       display: inline-block;
       padding: 12px 30px;
-      background-color: #fa1919;
+      background-color: #28a745;
       color: white;
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
       font-size: 18px;
-      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    .login-btn:hover {
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
-  <h1><%= title %></h1>
+  <h1>✅ <%= title %></h1>
   <p class="message"><%= message %></p>
   <a href="/login" class="login-btn">Login Now</a>
 </body>

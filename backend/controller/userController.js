@@ -56,7 +56,7 @@ export const registerUser = async (req, res) => {
       message: "Please check your email for verification link."
     });
   } catch (error) {
-    console.log(error);
+    
     res.status(500).json({
       status: 500,
       success: false,
@@ -79,21 +79,32 @@ export const verifyUser = async (req, res) => {
 
     const { name, email, password } = userVerificationPayload;
 
+    
+    const existingUser = await userModel.findOne({ email });
+
+    if (existingUser) {
+      return res.render('verificationSuccess', {
+        title: 'Already Verified',
+        message: 'You are already verified! Now login to our shop.',
+      });
+    }
+
+    
     const newUser = new userModel({ name, email, password });
     await newUser.save();
 
+    
     const newCart = new cartModel({ userId: newUser._id });
     await newCart.save();
 
-    // On success render success page
+    
     res.render('verificationSuccess', {
       title: 'Verification Successful',
       message: 'You are verified! Now login to our shop for shopping.',
-      token: createUserToken({ id: newUser._id, name, email }),
     });
 
   } catch (error) {
-    console.error(error);
+    
     res.status(500).render('verificationError', {
       title: 'Server Error',
       message: 'Internal Server Error. Please try again later.',
@@ -102,46 +113,124 @@ export const verifyUser = async (req, res) => {
   }
 };
 
-export const loginUser = async(req, res) => {
-    const {email, password}= req.body;
-    try {
-        const user = await userModel.findOne({email});
-        if(!user){
-            return res.status(400).json({
-                status : 400,
-                success : false,
-                message : "User does not exist"
-            });
-        }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch){
-            return res.status(400).json({
-                status : 400,
-                success : false,
-                message : "Enter valid credentisals"
-            });
-        }
-        const token = createToken(user._id, user.name, user.email);
-        const userCart = await cartModel.findOne({
-            userId : user._id
-        }, "items amount");
-        const userOrder = await orderModel.find({userId : user._id});
-
-        res.status(200).json({
-            status : 200,
-            success : true,
-            message : "User Logged In Successfully",
-            token,
-            cart : userCart.items,
-            order : userOrder
-        })
-        
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({
-            status:400,
-            success : false,
-            message: error
-        });
+export const loginUser = async (req, res) => {
+  try {
+    // Validate input using Zod
+    const validation = userLoginValidator.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        status: 400,
+        success: false,
+        message: "Validation failed",
+        errors: validation.error.issues.map(err => err.message)
+      });
     }
-}
+
+    const { email, password } = validation.data;
+
+    // Find user by email
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        success: false,
+        message: "User does not exist"
+      });
+    }
+
+    // Compare password using model method
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        status: 401,
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    // Create token
+    const token = createUserToken({
+      id: user._id,
+      name: user.name,
+      email: user.email
+    });
+
+    // Fetch cart & orders
+    const userCart = await cartModel.findOne(
+      { userId: user._id },
+      "items"
+    );
+    const userOrders = await orderModel.find({ userId: user._id });
+
+    // Success response
+    return res.status(200).json({
+      status: 200,
+      success: true,
+      message: "User logged in successfully",
+      token,
+      cart: userCart ? userCart.items : {},
+      orders: userOrders || []
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
+export const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Hardcoded admin credentials
+    const adminCredentials = {
+      email: "admin@shop.com",
+      password: "Admin@123" // ideally, store hashed in env or DB
+    };
+
+    // Check email
+    if (email !== adminCredentials.email) {
+      return res.status(401).json({
+        status: 401,
+        success: false,
+        message: "Invalid admin email or password"
+      });
+    }
+
+    // Check password
+    if (password !== adminCredentials.password) {
+      return res.status(401).json({
+        status: 401,
+        success: false,
+        message: "Invalid admin email or password"
+      });
+    }
+
+    // Create token
+    const token = createAdminToken({
+      role: "admin",
+      email: adminCredentials.email
+    });
+
+    return res.status(200).json({
+      status: 200,
+      success: true,
+      message: "Admin logged in successfully",
+      token
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};

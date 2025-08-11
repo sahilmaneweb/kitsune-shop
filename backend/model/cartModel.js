@@ -13,24 +13,24 @@ const cartSchema = new mongoose.Schema({
         of: Number,
         default: {}
     }
-}, { minimize: false });
+}, { minimize: false, timestamps: true });
 
 cartSchema.methods.convertToOrderItems = async function () {
   const itemsArray = [];
 
-  for (const productId of Object.keys(this.items)) {
-    const quantity = this.items[productId];
-    // Example: await some async operation here, e.g., fetching product info
-    // const productDetails = await ProductModel.findById(productId);
-
-    itemsArray.push({
-      _id: productId,
-      quantity
-    });
+  for (const [productId, sizes] of Object.entries(this.items)) {
+    for (const [size, quantity] of Object.entries(sizes)) {
+      itemsArray.push({
+        _id: productId,
+        size,
+        quantity
+      });
+    }
   }
 
   return itemsArray;
 };
+
 
 
 export default mongoose.model("Cart", cartSchema);

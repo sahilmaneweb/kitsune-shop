@@ -1,12 +1,19 @@
 import express from "express";
-import { authUser, verifyTokenFromParams, verifyUserToken } from "../middleware/userAuth.js"
-import { registerUser, loginUser, verifyUser } from "../controller/userController.js";
+import {  verifyTokenFromParams, verifyUserToken } from "../middleware/userAuth.js"
+import { verifyAdmin} from "../middleware/adminAuth.js";
+import { registerUser, loginUser, verifyUser, loginAdmin } from "../controller/userController.js";
+
 
 const userRoute = express.Router();
 
 userRoute.post("/registerUser", registerUser);
-userRoute.post("/loginUser", loginUser);
 userRoute.post("/verify", verifyTokenFromParams, verifyUser);
+
+userRoute.post("/loginUser", loginUser);
+userRoute.get("/verifyUser", verifyUserToken);
+
+userRoute.get("/verifyAdmin", verifyAdmin);
+userRoute.post("/loginAdmin", loginAdmin);
 
 userRoute.get("/preview/emailTemplate", (req, res) => {
     // res.render("../views/emailVerificationTemplate.ejs", {

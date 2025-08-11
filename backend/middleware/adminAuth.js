@@ -4,7 +4,7 @@ const JWT_KEY = process.env.ADMIN_JWT_KEY;
 
 
 export const createAdminToken = (payload) => {
-    const token = jwt.sign(payload, JWT_KEY, { expiresIn: "1h" });
+    const token = jwt.sign(payload, JWT_KEY, { expiresIn: "3h" });
     return `Bearer ${token}`;
 };
 
