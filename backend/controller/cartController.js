@@ -37,35 +37,45 @@ export const addToCart = async (req, res) => {
   const { productId, size, quantity } = req.body;
 
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     let userCart = await cartModel.findOne({ userId });
 
     if (!userCart) {
-      
       userCart = new cartModel({ userId, items: {} });
     }
 
-    
-    if (!userCart.items.has(productId)) {
-      userCart.items.set(productId, {});
+    // Ensure items is an object
+    if (typeof userCart.items !== 'object' || userCart.items === null) {
+      userCart.items = {};
     }
 
-    const productSizes = userCart.items.get(productId);
-
+    // Ensure productId entry is an object
+    if (!userCart.items[productId] || typeof userCart.items[productId] !== 'object') {
+      userCart.items[productId] = {};
+    }
 
     const safeQuantity = Math.min(Math.abs(parseInt(quantity)) || 0, 9);
+    
+    // Update the nested size and quantity
+    userCart.items[productId][size] = safeQuantity;
 
-    productSizes[size] = safeQuantity;
-    userCart.items.set(productId, productSizes);
+    // Use a more explicit way to update the nested object in Mongoose
+    // This ensures Mongoose detects the change in the 'items' object
+    await cartModel.updateOne(
+      { userId: userId },
+      { $set: { [`items.${productId}.${size}`]: safeQuantity } },
+      { upsert: true } // Creates a new document if one doesn't exist
+    );
 
-    await userCart.save(); 
+    // Fetch the updated cart to send back in the response
+    const updatedCart = await cartModel.findOne({ userId });
 
     res.status(200).json({
       status: 200,
       success: true,
       message: "Product added successfully",
-      cart: userCart.items,
+      cart: updatedCart.items,
     });
 
   } catch (error) {
@@ -86,7 +96,7 @@ export const updateCartQuantity = async (req, res) => {
 
     let userCart = await cartModel.findOne({ userId });
 
-    if (!userCart || !userCart.items.has(productId) || userCart.items.get(productId)[size] === undefined) {
+    if (!userCart || !userCart.items[productId] || userCart.items[productId][size] === undefined) {
       return res.status(400).json({
         status: 400,
         success: false,
@@ -94,15 +104,16 @@ export const updateCartQuantity = async (req, res) => {
       });
     }
 
-    const productSizes = userCart.items.get(productId);
+    const currentQuantity = userCart.items[productId][size];
+    let newQuantity;
 
     switch (operation) {
       case "increment":
-        productSizes[size] = Math.min(productSizes[size] + 1, 9);
+        newQuantity = Math.min(currentQuantity + 1, 9);
         break;
 
       case "decrement":
-        productSizes[size] = Math.max(productSizes[size] - 1, 0);
+        newQuantity = Math.max(currentQuantity - 1, 0);
         break;
 
       default:
@@ -113,25 +124,40 @@ export const updateCartQuantity = async (req, res) => {
         });
     }
 
-    
-    if (productSizes[size] === 0) {
-      delete productSizes[size];
-    }
+    let updatedCart;
 
-    
-    if (Object.keys(productSizes).length === 0) {
-      userCart.items.delete(productId);
+    if (newQuantity === 0) {
+      // If quantity becomes 0, remove the size
+      const unsetObject = { [`items.${productId}.${size}`]: "" };
+      updatedCart = await cartModel.findOneAndUpdate(
+        { userId },
+        { $unset: unsetObject },
+        { new: true }
+      );
+
+      // Check if product object is now empty and remove it
+      if (Object.keys(updatedCart.items[productId] || {}).length === 0) {
+        updatedCart = await cartModel.findOneAndUpdate(
+          { userId },
+          { $unset: { [`items.${productId}`]: "" } },
+          { new: true }
+        );
+      }
     } else {
-      userCart.items.set(productId, productSizes);
+      // Otherwise, update the quantity
+      const setObject = { [`items.${productId}.${size}`]: newQuantity };
+      updatedCart = await cartModel.findOneAndUpdate(
+        { userId },
+        { $set: setObject },
+        { new: true }
+      );
     }
-
-    await userCart.save();
-
+    
     res.status(200).json({
       status: 200,
       success: true,
       message: "Product quantity updated successfully",
-      cart: userCart.items,
+      cart: updatedCart.items,
     });
 
   } catch (error) {
@@ -146,7 +172,8 @@ export const updateCartQuantity = async (req, res) => {
 
 export const removeFromCart = async (req, res) => {
   try {
-    const { userId, productId, size } = req.body;
+    const { productId, size } = req.body;
+    const userId = req.user.id;
 
     if (!userId || !productId || !size) {
       return res.status(400).json({
@@ -165,24 +192,26 @@ export const removeFromCart = async (req, res) => {
       });
     }
 
-    
-    delete userCart.items[productId][size];
-
-    if (Object.keys(userCart.items[productId]).length === 0) {
-      delete userCart.items[productId];
-    }
-
-    await cartModel.findOneAndUpdate(
-      { userId: userCart.userId },
-      { items: userCart.items },
+    let updatedCart = await cartModel.findOneAndUpdate(
+      { userId },
+      { $unset: { [`items.${productId}.${size}`]: "" } },
       { new: true }
     );
+
+    // Check if the product object is now empty and remove it
+    if (Object.keys(updatedCart.items[productId] || {}).length === 0) {
+      updatedCart = await cartModel.findOneAndUpdate(
+        { userId },
+        { $unset: { [`items.${productId}`]: "" } },
+        { new: true }
+      );
+    }
 
     res.status(200).json({
       status: 200,
       success: true,
       message: "Product removed successfully",
-      cart: userCart.items,
+      cart: updatedCart.items,
     });
 
   } catch (error) {
@@ -206,11 +235,13 @@ export const clearCart = async (req, res) => {
         message: "Cart not found for user",
       });
     }
+
     const updatedCart = await cartModel.findOneAndUpdate(
       { userId },
       { items: {} },
       { new: true }
     );
+
     res.status(200).json({
       status: 200,
       success: true,

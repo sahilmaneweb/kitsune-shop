@@ -7,7 +7,7 @@ import { registerUser, loginUser, verifyUser, loginAdmin } from "../controller/u
 const userRoute = express.Router();
 
 userRoute.post("/registerUser", registerUser);
-userRoute.post("/verify", verifyTokenFromParams, verifyUser);
+userRoute.get("/verify", verifyTokenFromParams, verifyUser);
 
 userRoute.post("/loginUser", loginUser);
 userRoute.get("/verifyUser", verifyUserToken);

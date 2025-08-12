@@ -1,6 +1,7 @@
 import ejs from 'ejs';
 import userModel from "../model/userModel.js";
 import cartModel from "../model/cartModel.js";
+import orderModel from '../model/orderModel.js';
 import { userRegisterValidator, userLoginValidator } from "../validators/userValidator.js";
 import { createUserToken, createUserVerifyUrl } from "../middleware/userAuth.js";
 import { createAdminToken } from "../middleware/adminAuth.js";

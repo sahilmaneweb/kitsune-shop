@@ -12,12 +12,12 @@ export const productValidator = z.object({
     }),
 
   offerPrice: z
-    .number({ required_error: "Offer price is required" })
-    .min(0, "Offer price must be a positive number"),
+    .string({ required_error: "Offer price is required" })
+    .min(1, "Offer price must be a positive number"),
 
   price: z
-    .number({ required_error: "Price is required" })
-    .min(0, "Price must be a positive number"),
+    .string({ required_error: "Price is required" })
+    .min(1, "Price must be a positive number"),
 
   description: z
     .string({ required_error: "Description is required" })

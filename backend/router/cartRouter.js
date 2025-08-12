@@ -6,14 +6,14 @@ import {
   clearCart, 
   updateCartQuantity 
 } from "../controller/cartController.js";
-import { userAuth } from "../middleware/userAuth.js";
+import { authUser } from "../middleware/userAuth.js";
 
 const cartRoute = express.Router();
 
-cartRoute.get("/getCart", userAuth, getCart);
-cartRoute.post("/addToCart", userAuth, addToCart);
-cartRoute.delete("/clearCart", userAuth, clearCart);
-cartRoute.delete("/removeFromCart", userAuth, removeFromCart);
-cartRoute.patch("/updateCartQuantity", userAuth, updateCartQuantity);
+cartRoute.get("/getCart", authUser, getCart);
+cartRoute.post("/addToCart", authUser, addToCart);
+cartRoute.delete("/clearCart", authUser, clearCart);
+cartRoute.delete("/removeFromCart", authUser, removeFromCart);
+cartRoute.patch("/updateCartQuantity", authUser, updateCartQuantity);
 
 export default cartRoute;

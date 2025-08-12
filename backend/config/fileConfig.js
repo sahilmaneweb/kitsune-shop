@@ -10,6 +10,6 @@ const upload = multer({
     }
     cb(null, true);
   }
-}).single('file');
+});
 
 export default upload;

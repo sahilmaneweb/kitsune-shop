@@ -37,9 +37,9 @@ export const allProduct = async (req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    
     const parsed = productValidator.safeParse(req.body);
     if (!parsed.success) {
+      console.error("Validation error:", parsed.error);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -47,24 +47,24 @@ export const addProduct = async (req, res) => {
       });
     }
 
-    
     const fileName = `${Date.now()}-${req.file.originalname}`;
 
-    
-    const uploadResponse = imagekit.upload({
-      file: req.file.buffer,
+    const uploadResponse = await imagekit.upload({
+      file: req.file.buffer.toString('base64'),
       fileName,
-      transformation: [{ format: 'webp' }]
-    });
+      folder: '/kitsune-product-images/',
+      });
 
-    
+
+    const { name, category, offerPrice, price, description } = parsed.data;
+
     const data = new productModel({
-      name: parsed.name,
-      category: parsed.category,
-      offerPrice: parsed.offerPrice,
-      price: parsed.price,
-      description: parsed.description,
-      productUrl: uploadResponse.url
+      name,
+      category,
+      offerPrice,
+      price,
+      description,
+      productUrl : uploadResponse.url
     });
 
     await data.save();
@@ -83,6 +83,7 @@ export const addProduct = async (req, res) => {
     });
   }
 };
+
 
 export const toggleProductVisibility = async (req, res) => {
   try {

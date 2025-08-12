@@ -13,7 +13,7 @@ const orderSchema = new mongoose.Schema({
   userEmail: { type: String, required: true },
   items: [
     {
-      _id: {
+      productId: {
         type: ObjectId,
         ref: "Product",
         required: true

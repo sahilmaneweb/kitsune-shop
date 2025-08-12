@@ -1,36 +1,34 @@
 import mongoose from "mongoose";
 
-const { ObjectId } = mongoose.Types;
-
 const cartSchema = new mongoose.Schema({
-    userId: {
-        type: ObjectId,
-        ref: "User",
-        required: true
-    },
-    items: {
-        type: Map,
-        of: Number,
-        default: {}
-    }
-}, { minimize: false, timestamps: true });
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  items: {
+    type: Object,
+    default: {}
+  }
+});
 
-cartSchema.methods.convertToOrderItems = async function () {
+cartSchema.methods.convertToOrderItems = function() {
   const itemsArray = [];
-
-  for (const [productId, sizes] of Object.entries(this.items)) {
-    for (const [size, quantity] of Object.entries(sizes)) {
-      itemsArray.push({
-        _id: productId,
-        size,
-        quantity
-      });
+  if (this.items && typeof this.items === 'object') {
+    for (const productId in this.items) {
+      if (this.items.hasOwnProperty(productId)) {
+        const sizes = this.items[productId];
+        for (const size in sizes) {
+          if (sizes.hasOwnProperty(size)) {
+            itemsArray.push({
+              productId: new mongoose.Types.ObjectId(productId),
+              size: size,
+              quantity: sizes[size]
+            });
+          }
+        }
+      }
     }
   }
-
   return itemsArray;
 };
 
+const cartModel = mongoose.model("Cart", cartSchema);
 
-
-export default mongoose.model("Cart", cartSchema);
+export default cartModel;

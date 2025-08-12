@@ -1,5 +1,6 @@
-import orderModel from '../model/orderModel.js';
-import cartModel from '../model/cartModel.js';
+import orderModel from "../model/orderModel.js";
+import cartModel from "../model/cartModel.js";
+import productModel from "../model/productModel.js";
 
 export const allOrder = async (req, res) => {
   try {
@@ -63,10 +64,6 @@ export const getUserOrder = async (req, res) => {
 };
 
 
-import orderModel from "../models/orderModel.js";
-import cartModel from "../models/cartModel.js";
-import productModel from "../models/productModel.js";
-
 export const addOrder = async (req, res) => {
   const { userName, userContact, address } = req.body;
   const userId = req.user.id;
@@ -82,15 +79,13 @@ export const addOrder = async (req, res) => {
       });
     }
 
-    const itemsArray = await cart.convertToOrderItems();
-
-    // Fetch all product IDs from itemsArray
-    const productIds = itemsArray.map(item => item._id);
+    const itemsArray = cart.convertToOrderItems();
+    const productIds = itemsArray.map(item => item.productId);
     const products = await productModel.find({ _id: { $in: productIds } });
 
     let totalAmount = 0;
     const enrichedItems = itemsArray.map(item => {
-      const product = products.find(p => p._id.toString() === item._id.toString());
+      const product = products.find(p => p._id.toString() === item.productId.toString());
       if (product) {
         totalAmount += product.offerPrice * item.quantity;
       }
@@ -110,9 +105,7 @@ export const addOrder = async (req, res) => {
 
     const savedOrder = await order.save();
 
-    // Clear cart after placing order
-    cart.items = {};
-    await cart.save();
+    await cartModel.updateOne({ userId }, { $set: { items: {} } });
 
     res.status(200).json({
       status: 200,
@@ -130,8 +123,6 @@ export const addOrder = async (req, res) => {
   }
 };
 
-
-import orderModel from "../models/orderModel.js";
 
 export const confirmOrder = async (req, res) => {
   const { orderId } = req.params;
