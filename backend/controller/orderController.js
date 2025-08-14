@@ -1,6 +1,6 @@
 import orderModel from "../model/orderModel.js";
-import cartModel from "../model/cartModel.js";
-import productModel from "../model/productModel.js";
+import cartModel from "../model/cartModel.js"; // This should be CartItem model now
+
 
 export const allOrder = async (req, res) => {
   try {
@@ -30,7 +30,6 @@ export const allOrder = async (req, res) => {
     });
   }
 };
-
 
 export const getUserOrder = async (req, res) => {
   const userId = req.user.id;
@@ -64,14 +63,17 @@ export const getUserOrder = async (req, res) => {
 };
 
 
+
 export const addOrder = async (req, res) => {
   const { userName, userContact, address } = req.body;
   const userId = req.user.id;
   const userEmail = req.user.email;
 
   try {
-    const cart = await cartModel.findOne({ userId });
-    if (!cart || !cart.items || Object.keys(cart.items).length === 0) {
+    // 1. Fetch cart items and populate with product details
+    const cartItems = await cartModel.find({ userId }).populate('productId');
+
+    if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({
         status: 400,
         success: false,
@@ -79,19 +81,33 @@ export const addOrder = async (req, res) => {
       });
     }
 
-    const itemsArray = cart.convertToOrderItems();
-    const productIds = itemsArray.map(item => item.productId);
-    const products = await productModel.find({ _id: { $in: productIds } });
+    // 2. Validate all cart items before proceeding
+    const invalidItems = cartItems.filter(item => !item.productId || !item.productId.isVisible);
 
+    if (invalidItems.length > 0) {
+      return res.status(400).json({
+        status: 400,
+        success: false,
+        message: 'One or more items in the cart are no longer available.'
+      });
+    }
+
+    // 3. Prepare order data
     let totalAmount = 0;
-    const enrichedItems = itemsArray.map(item => {
-      const product = products.find(p => p._id.toString() === item.productId.toString());
-      if (product) {
-        totalAmount += product.offerPrice * item.quantity;
-      }
-      return item;
-    });
+    const enrichedItems = [];
+    for (const item of cartItems) {
+      enrichedItems.push({
+        productId: item.productId._id,
+        name: item.productId.name,
+        price: item.productId.offerPrice,
+        imageUrl: item.productId.productUrl,
+        size: item.size,
+        quantity: item.quantity
+      });
+      totalAmount += item.productId.offerPrice * item.quantity;
+    }
 
+    // 4. Create the new order document
     const order = new orderModel({
       userId,
       userName,
@@ -105,7 +121,8 @@ export const addOrder = async (req, res) => {
 
     const savedOrder = await order.save();
 
-    await cartModel.updateOne({ userId }, { $set: { items: {} } });
+    // 5. Clear the cart (this is a separate, non-atomic operation)
+    await cartModel.deleteMany({ userId });
 
     res.status(200).json({
       status: 200,
@@ -113,6 +130,7 @@ export const addOrder = async (req, res) => {
       message: "Order placed successfully",
       order: savedOrder
     });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -122,7 +140,6 @@ export const addOrder = async (req, res) => {
     });
   }
 };
-
 
 export const confirmOrder = async (req, res) => {
   const { orderId } = req.params;
@@ -145,8 +162,12 @@ export const confirmOrder = async (req, res) => {
       });
     }
 
-    order.status = "confirmed";
-    const updatedOrder = await order.save();
+    // Now update the status without re-validating the entire document
+    const updatedOrder = await orderModel.findByIdAndUpdate(
+      orderId,
+      { status: "confirmed" },
+      { new: true, runValidators: false }
+    );
 
     res.status(200).json({
       status: 200,
@@ -186,8 +207,12 @@ export const cancelOrder = async (req, res) => {
       });
     }
 
-    order.status = "cancelled";
-    const updatedOrder = await order.save();
+    // Now update the status without re-validating the entire document
+    const updatedOrder = await orderModel.findByIdAndUpdate(
+      orderId,
+      { status: "cancelled" },
+      { new: true, runValidators: false }
+    );
 
     res.status(200).json({
       status: 200,

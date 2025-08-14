@@ -2,6 +2,20 @@ import mongoose from "mongoose";
 
 const { ObjectId } = mongoose.Types;
 
+// Define a sub-schema for the items in the order
+const orderItemSchema = new mongoose.Schema({
+  productId: {
+    type: ObjectId,
+    ref: "Product",
+    required: true
+  },
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  imageUrl: { type: String, required: true },
+  size: { type: String, required: true },
+  quantity: { type: Number, required: true }
+}, { _id: false });
+
 const orderSchema = new mongoose.Schema({
   userId: {
     type: ObjectId,
@@ -11,17 +25,7 @@ const orderSchema = new mongoose.Schema({
   userName: { type: String, required: true },
   userContact: { type: Number, required: true },
   userEmail: { type: String, required: true },
-  items: [
-    {
-      productId: {
-        type: ObjectId,
-        ref: "Product",
-        required: true
-      },
-      size: { type: String, required: true },
-      quantity: { type: Number, required: true }
-    }
-  ],
+  items: [orderItemSchema],
   amount: { type: Number, required: true },
   address: {
     street: { type: String, required: true },
@@ -36,6 +40,6 @@ const orderSchema = new mongoose.Schema({
     default: "pending"
   },
   date: { type: Date, default: Date.now }
-}, { minimize: false });
+}, { minimize: false, timestamps: true });
 
 export default mongoose.model("Order", orderSchema);
