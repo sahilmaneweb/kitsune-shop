@@ -3,7 +3,7 @@ import './config/envConfig.js';  // Load env variables FIRST
 import express, { json, urlencoded } from 'express';
 import cors from 'cors';
 import path from 'path';
-import ejs from 'ejs';
+
 import connectDB from './config/db.js';
 
 const app = express();

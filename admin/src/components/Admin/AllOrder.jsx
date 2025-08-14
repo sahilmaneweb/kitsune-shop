@@ -1,91 +1,69 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { GiCardboardBoxClosed } from 'react-icons/gi';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from 'react';
+import api from '../../services/api';
+import { toast } from 'react-hot-toast';
+import OrderUI from '../OrderUI';
+
 
 const AllOrder = () => {
- 
-  const [order, setOrder ] = useState(false);
-  const fetchOrder = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrders = async () => {
     try {
-      axios.get("http://localhost:8080/order/allOrder").then((response) => {
-        if(response.data.data.length > 0){
-          setOrder((prev)=>(response.data.data));
-          
-        }
-      })
+      const response = await api.get("/order/allOrder");
+      if (response.data.success && response.data.data.length > 0) {
+        setOrders(response.data.data);
+      } else {
+        setOrders([]);
+      }
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to fetch orders.");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-  }
-  useEffect(()=>{
-    fetchOrder();
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, []);
 
-  const onStatusChange = (e, id) => {
-    const status = e.target.value;
-    axios.put("http://localhost:8080/order/updateOrderStatus", {orderId : id, status}).then((response) => {
-      if(response.data.success){
-        fetchOrder();
-        toast.success("Order status changed successfully.");
-      }
-    })
-    console.log(status);
-    fetchOrder();
+  const handleUpdateStatus = (orderId, newStatus) => {
+    setOrders(prevOrders =>
+      prevOrders.map(order =>
+        order._id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
   };
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center h-full text-2xl text-red-600'>
+        Loading orders...
+      </div>
+    );
+  }
+
   return (
     <div className='p-2'>
-      <h1 className='block pl-2 text-2xl  py-2 border-b-2 border-red-400 mb-3'>All Orders</h1>
-      <div>
-        {
-          order.length > 0 ? (
-            <div>
-              {
-                order.map((item,index)=>(
-                  <div key={index} className='border rounded-lg border-slate-300 p-2'>
-                    <h1 className='text-lg'>Order Id : {item._id} </h1>
-                    <section className='mt-2 grid gap-3 grid-cols-1 md:grid-cols-[0.5fr_2fr_1fr] lg:grid-cols-[0.5fr_2fr_1fr_1fr_1fr] text-sm'>
-                    <div className='border place-self-start border-slate-300 rounded-lg w-16 grid place-items-center'>
-                      <GiCardboardBoxClosed size="3em" />
-                    </div>
-                    <div>
-                      {
-                        item.items.map((product, index)=>{
-                          if(index === item.items.length -1){
-                            return <p className='inline-block pr-1 text-base' key={index}>{product.quantity} x {product.productName} </p>
-                          }else{
-                            return <p className='inline-block pr-1 text-base' key={index}>{product.quantity} x {product.productName} ,</p>
-                          }
-                        })
-                      }
-                      <p className='mt-3 font-medium text-base'>{item.userName}</p>
-                      <p>{item.userEmail}</p>
-                      <p>{item.address.street + " , " + item.address.city + " , " + item.address.state + " , " + item.address.country  + " ,  " +  item.address.zipcode}</p>
-                    </div>
-                    <div>
-                      <p>Items : {item.items.length}</p>
-                      <p>Method : Cash</p>
-                      <p>Date : {new Date(item.date).toLocaleDateString()}</p>
-                    </div>
-                    <p className='text-lg'>$ {item.amount}</p>
-                    <select value={item.status} onChange={(event)=>{onStatusChange(event, item._id)}} className='border place-self-start justify-self-stretch text-lg border-slate-400 p-2 rounded-md cursor-pointer focus:outline-none'>
-                      <option value="placed">Placed</option>
-                      <option value="shipping">Shipping</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
-                    </section>
-                  </div>
-                  
-                ))
-              }
-            </div>
-          ) : (
-            <div>Empty</div>
-          )
-        }
-      </div>
+      <h1 className='block pl-2 text-2xl py-2 border-b-2 border-red-400 mb-3 font-semibold'>All Orders</h1>
+      {orders.length > 0 ? (
+        <div className='space-y-4'>
+          {orders.map((orderItem) => (
+            <OrderUI
+              key={orderItem._id}
+              order={orderItem}
+              onUpdateStatus={handleUpdateStatus}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className='w-full text-center py-20 bg-red-100 rounded-lg'>
+          <p className='text-2xl font-bold text-red-600 mb-4'>No orders found for now.</p>
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default AllOrder
+export default AllOrder;

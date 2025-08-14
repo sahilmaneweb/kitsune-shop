@@ -5,7 +5,7 @@ const productSchema = new mongoose.Schema({
     category: { 
         type: String, 
         required: true,
-        enum: ['kitsune-tees', 'kitsune-headgear', 'kitsune-shirt']
+        enum: ['kitsune-tshirt', 'kitsune-headgear', 'kitsune-shirt']
     },
     productUrl: { type: String, required: true },
     offerPrice: { type: Number, required: true },
