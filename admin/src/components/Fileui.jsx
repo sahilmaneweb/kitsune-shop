@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Fileui = () => {
+function Fileui() {
   return (
     <div className='size-96 my-auto flex flex-col justify-center items-center cursor-pointer bg-red-200 hover:bg-red-300 transition-all border-2 border-red-600 rounded-md border-dashed'>
       <svg className="w-8 h-8 mb-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">

@@ -1,3 +1,4 @@
+import productModel from '../model/productModel.js';
 import ejs from 'ejs';
 import userModel from "../model/userModel.js";
 import cartModel from "../model/cartModel.js";
@@ -191,7 +192,6 @@ export const loginUser = async (req, res) => {
 export const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     // Hardcoded admin credentials
     const adminCredentials = {
       email: "admin@shop.com",
@@ -236,6 +236,67 @@ export const loginAdmin = async (req, res) => {
       success: false,
       message: "Internal server error",
       error: error.message
+    });
+  }
+};
+
+
+
+export const getDashboardStats = async (req, res) => {
+  try {
+    const [
+      totalProducts,
+      kitsuneTshirtCount,
+      kitsuneShirtCount,
+      kitsuneHeadgearCount,
+      totalOrders,
+      pendingOrders,
+      confirmedOrders,
+      cancelledOrders,
+      totalRevenue, // New
+    ] = await Promise.all([
+      productModel.countDocuments(),
+      productModel.countDocuments({ category: 'kitsune-tshirt' }),
+      productModel.countDocuments({ category: 'kitsune-shirt' }),
+      productModel.countDocuments({ category: 'kitsune-headgear' }),
+      orderModel.countDocuments(),
+      orderModel.countDocuments({ status: 'pending' }),
+      orderModel.countDocuments({ status: 'confirmed' }),
+      orderModel.countDocuments({ status: 'cancelled' }),
+      // New aggregation pipeline to calculate total revenue
+      orderModel.aggregate([
+        { $match: { status: 'confirmed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        products: {
+          total: totalProducts,
+          categories: {
+            tshirt: kitsuneTshirtCount,
+            shirt: kitsuneShirtCount,
+            headgear: kitsuneHeadgearCount,
+          },
+        },
+        orders: {
+          total: totalOrders,
+          status: {
+            pending: pendingOrders,
+            confirmed: confirmedOrders,
+            cancelled: cancelledOrders,
+          },
+          revenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0, // Extract revenue from the aggregation result
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard statistics.',
+      error: error.message,
     });
   }
 };

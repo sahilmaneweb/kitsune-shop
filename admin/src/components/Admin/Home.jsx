@@ -1,33 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+ 
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../../context/AuthProvider';
-import api from '../../services/api';
+import axios from 'axios';
 
-function AdminLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { isAuthenticated, loginUser } = useAuth();
+
+function Home() {
+  var [email, setEmail] = useState('');
+  var [password, setPassword] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
-
-  const handleLogin = async (e) => {
+  function handleLogin(e) {
     e.preventDefault();
-    const result = await loginUser(email, password);
-    
-    if (result.success) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-      setEmail('');
-      setPassword('');
+    try {
+      var response = axios.post('/auth/login', { email: email, password: password });
+      var token = response.data.token;
+
+      localStorage.setItem('authToken', token);
+      toast.success("Login successful!");
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error('Login failed. Please check your credentials.');
     }
-  };
+  }
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100'>
@@ -41,7 +36,7 @@ function AdminLogin() {
               id="email" 
               name="email" 
               value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              onChange={function(e){setEmail(e.target.value)}} 
               className='block w-full text-md border-2 py-2 px-3 border-red-300 rounded-md focus:outline-none focus:border-red-600' 
               required
             />
@@ -54,7 +49,7 @@ function AdminLogin() {
               id="password" 
               name="password" 
               value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
+              onChange={function(e){setPassword(e.target.value)}} 
               className='block w-full text-md border-2 py-2 px-3 border-red-300 rounded-md focus:outline-none focus:border-red-600' 
               required
             />
@@ -70,12 +65,8 @@ function AdminLogin() {
           </section>
         </form>
       </div>
-      <footer className="fixed bottom-0 w-full text-center py-4 text-sm text-red-600">
-        <p>Copyrights owned by Kitsune Store &copy; 2025</p>
-        <p>Made with ❤️ by Sahil Mane</p>
-      </footer>
     </div>
   );
-};
+}
 
-export default AdminLogin;
+export default Home;

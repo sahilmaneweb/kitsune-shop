@@ -1,10 +1,12 @@
 import React from 'react';
 import { IoEye, IoEyeOffOutline } from 'react-icons/io5';
-import { toast } from 'react-hot-toast';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 
 
-const ListUI = ({ id, name, product, category, offerPrice, price, isVisible, onToggleVisibility }) => {
+
+
+function ListUI({ id, name, product, category, offerPrice, price, isVisible, onToggleVisibility }) {
     const toggleProductVisibility = async () => {
         try {
             const endpoint = `/product/toggleVisibility/${id}`;
@@ -12,7 +14,7 @@ const ListUI = ({ id, name, product, category, offerPrice, price, isVisible, onT
                 // The backend might need the new visibility status in the body
                 isVisible: !isVisible 
             });
-            toast.success(`Product is now ${isVisible ? 'hidden' : 'visible'}.`);
+            toast.success(`Product ${name} is now ${isVisible ? 'hidden' : 'visible'}.`);
             onToggleVisibility(id);
         } catch (error) {
             console.error("Failed to toggle product visibility:", error);

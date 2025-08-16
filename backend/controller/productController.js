@@ -37,7 +37,15 @@ export const allProduct = async (req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    const parsed = productValidator.safeParse(req.body);
+    // Manually convert price fields from strings to numbers before validation
+    const dataToValidate = {
+      ...req.body,
+      offerPrice: Number(req.body.offerPrice),
+      price: Number(req.body.price),
+    };
+
+    const parsed = productValidator.safeParse(dataToValidate);
+
     if (!parsed.success) {
       console.error("Validation error:", parsed.error);
       return res.status(400).json({
@@ -53,8 +61,7 @@ export const addProduct = async (req, res) => {
       file: req.file.buffer.toString('base64'),
       fileName,
       folder: '/kitsune-product-images/',
-      });
-
+    });
 
     const { name, category, offerPrice, price, description } = parsed.data;
 
