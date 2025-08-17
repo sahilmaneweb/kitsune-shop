@@ -6,12 +6,13 @@ import { BrowserRouter } from 'react-router'
 import { ShopContextProvider } from './context/ShopContext.jsx'
 import { Toaster } from 'react-hot-toast'
 
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ShopContextProvider>
       <BrowserRouter >
         <App />
-        <Toaster position="top-right" reverseOrder={false} />
+        <Toaster position='top-right' reverseOrder={false} />
       </BrowserRouter>
     </ShopContextProvider>
   </StrictMode>,

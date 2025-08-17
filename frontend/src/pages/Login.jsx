@@ -1,116 +1,119 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { ShopContext } from '../context/ShopContext';
-import { useNavigate } from 'react-router';
-import axios from 'axios';
+import { useShopContext } from '../context/ShopContext';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setToken, setOrder, setCart } = useContext(ShopContext);
+  const { login, isAuthenticated } = useShopContext();
   const [state, setState] = useState('Login');
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(()=>{
-    setState('Login');
-  },[]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try{
-    if(state == 'Login'){
-      const data = {email,password};
-      for(const item in data){
-        if(data[item] == ""){
-          toast.error(`Input fields should be filled`);
+    try {
+      if (state === 'Login') {
+        if (!email || !password) {
+          toast.error("Email and password fields should be filled.");
           return;
         }
+        const result = await login(email, password);
+        
+        if (result.success) {
+          toast.success(result.message);
+        } else {
+          toast.error(result.message);
+          setEmail('');
+          setPassword('');
+        }
+      } else if (state === 'Register') {
+        if (!fname || !lname || !email || !password) {
+          toast.error("All input fields should be filled.");
+          return;
+        }
+        const data = { name: `${fname} ${lname}`, email, password };
+        const response = await api.post("/user/registerUser", data);
+
+        if (response.data.success) {
+          toast.success(response.data.message || "Registration successful! Please check your email for verification.");
+          setEmail('');
+          setPassword('');
+          setFname('');
+          setLname('');
+          setState('Login');
+        } else {
+          toast.error(response.data.message || "Registration failed.");
+        }
       }
-      const response = await axios.post("http://localhost:8080/user/loginUser",data,{headers: { 'Content-Type': 'application/json' }}).then((res)=> res.data).catch((err)=>{console.log(err);});
-      console.log(response);
-      if(response.success){
-        setToken(response.token);
-        localStorage.setItem("authToken", response.token);
-        setCart(response.cart);
-        setOrder(response.order);
-        toast.success(response.message);
-        navigate("/");
-      }else{
-        toast.error(resposne.message);
-      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error(error.response?.data?.message || "An unexpected error occurred. Please try again.");
       
-
-    }else if(state == 'Register') {
-      let data = {fname,lname,email,password};
-      for(const item in data){
-        if(data[item] == ""){
-          toast.error(`Input fields should be filled`);
-          return;
-        }
-      }
-      data = {name: fname + " " + lname,email,password};
-      const response =await axios.post("http://localhost:8080/user/registerUser",data,{headers: { 'Content-Type': 'application/json' }}).then((res)=> res.data).catch((err)=>{console.error(err)});
-      console.log(response);
-      if(response.success){
-        setToken(response.token);
-        setCart(response.cart);
-        toast.success(response.message);
-        navigate("/");
-      }else{
-        toast.error(response.message)
-      }
-
+      // Clear input fields on any error
+      setEmail('');
+      setPassword('');
+      setFname('');
+      setLname('');
     }
-  }catch(error){
-    console.log(error);
-    toast.error(error.message);
-  }
-  }
+  };
 
   return (
-    <div className='px-4'>
-      <form onSubmit={handleSubmit} className='border-2 rounded-md p-3 mx-auto max-w-[530px] shadow-md my-3'>
-        <h1 className='text-2xl font-semibold pb-2 border-b-2'>{state}</h1>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4'>
+      <form onSubmit={handleSubmit} className='border-2 border-red-300 rounded-md p-6 mx-auto w-full max-w-md shadow-lg bg-white'>
+        <h1 className='text-3xl font-bold pb-3 border-b-2 border-red-400 mb-6 text-red-600 text-center'>{state}</h1>
 
-        <section className={`grid grid-cols-2 gap-2 ${state == "Register" ? "grid" : "hidden"}`}>
+        <section className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${state === "Register" ? "grid" : "hidden"}`}>
           <div>
-            <label htmlFor="fname" className='text-lg py-2 block'>First Name : </label>
-            <input type="text" name="fname" id="fname" onChange={(e)=>setFname(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-1 text-[16px] focus:ring-red-300' />
+            <label htmlFor="fname" className='text-lg py-2 block text-gray-700 font-semibold'>First Name : </label>
+            <input type="text" name="fname" id="fname" value={fname} onChange={(e) => setFname(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete="given-name" />
           </div>
           <div>
-            <label htmlFor="lname" className='text-lg py-2 block'>Last Name : </label>
-            <input type="text" name="lname" id="lname" onChange={(e)=>setLname(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-1 text-[16px] focus:ring-red-300' />
+            <label htmlFor="lname" className='text-lg py-2 block text-gray-700 font-semibold'>Last Name : </label>
+            <input type="text" name="lname" id="lname" value={lname} onChange={(e) => setLname(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete="family-name" />
           </div>
         </section>
 
-          <div>
-            <label htmlFor="email" className='text-lg py-2 block'>Email : </label>
-            <input type="email" name="email" id="email" onChange={(e)=>setEmail(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-1 text-[16px] focus:ring-red-300' />
+        <div className='mt-4'>
+          <label htmlFor="email" className='text-lg py-2 block text-gray-700 font-semibold'>Email : </label>
+          <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete="email" />
+        </div>
+        <div className='mt-4'>
+          <label htmlFor="password" className='text-lg py-2 block text-gray-700 font-semibold'>Password : </label>
+          <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete={state === 'Login' ? 'current-password' : 'new-password'} />
+        </div>
+        
+        {state === 'Register' && (
+          <div className='flex gap-2 items-start py-2 mt-2'>
+            <input type="checkbox" defaultChecked name="agree" id="agree" className='mt-2 accent-red-500 block size-4' required />
+            <label htmlFor="agree" className='text-sm text-gray-600'>I agree to all Terms & Conditions by Kitsune Merchandise Ltd</label>
           </div>
-          <div>
-            <label htmlFor="password" className='text-lg py-2 block'>Password : </label>
-            <input type="password" name="password" id="password" onChange={(e)=>setPassword(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-1 text-[16px] focus:ring-red-300' />
-          </div>
-          <div className='flex gap-2 items-start py-2'>
-            <input type="checkbox" defaultChecked name="agrre" id="agree" className='mt-2 accent-red-500 block' />
-            <label htmlFor="agree">I agree to all Terms & Conditions by Kitsune Mechandise Ltd</label>
-          </div>
-          <button className='block w-full p-2 bg-red-500 rounded-md my-4 text-lg font-semibold text-white hover:bg-red-600'>
-            {state} Now
-          </button>
-          <div>
-            {
-              state == 'Login' ? (
-                <p>If don't have account, then <span className='text-red-600 cursor-pointer font-semibold' onClick={()=>setState('Register')}>Register</span> here </p>
-              ) : (<p>If you have account, then <span className='text-red-600 cursor-pointer font-semibold' onClick={()=>setState('Login')}>Login</span> here</p>)
-            }
-          </div>
+        )}
+
+        <button type="submit" className='block w-full p-3 bg-red-600 rounded-md my-6 text-lg font-semibold text-white hover:bg-red-700 transition-colors duration-200'>
+          {state} Now
+        </button>
+
+        <div className='text-center text-gray-700'>
+          {state === 'Login' ? (
+            <p>If you don't have an account, then <span className='text-red-600 cursor-pointer font-semibold hover:underline' onClick={() => setState('Register')}>Register here</span></p>
+          ) : (
+            <p>If you have an account, then <span className='text-red-600 cursor-pointer font-semibold hover:underline' onClick={() => setState('Login')}>Login here</span></p>
+          )}
+        </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
