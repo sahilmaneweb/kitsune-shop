@@ -1,15 +1,16 @@
 import React from 'react';
 import logo from '../assets/kitsune-logo.png';
-import { Clock, Copyright, Github, Instagram, Linkedin, Phone } from 'lucide-react';
+import { Clock, Copyright, Facebook, Github, Instagram, Linkedin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
-  // Object for social media URLs
   const socialLinks = {
     instagram: "https://www.instagram.com",
     github: "https://www.github.com",
     facebook: "https://www.facebook.com",
     linkedin: "https://www.linkedin.com",
   };
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className='mt-8 pb-4'>
@@ -54,26 +55,27 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <div className='space-y-1'>
-            <p className='text-xl font-bold mb-2'>Navigation</p>
-            <a href="#" className='block hover:underline hover:text-red-200'>Home</a>
-            <a href="#" className='block hover:underline hover:text-red-200'>About Us</a>
-            <a href="#" className='block hover:underline hover:text-red-200'>Collection</a>
-            <a href="#" className='block hover:underline hover:text-red-200'>Services</a>
-          </div>
+          {/* Navigation Links and Quick Links side by side on medium screens */}
+          <div className='grid grid-cols-2 md:col-span-2 gap-8'>
+            <div className='space-y-1'>
+              <p className='text-xl font-bold mb-2'>Navigation</p>
+              <a href="#" className='block hover:underline hover:text-red-200'>Home</a>
+              <a href="#" className='block hover:underline hover:text-red-200'>About Us</a>
+              <a href="#" className='block hover:underline hover:text-red-200'>Collection</a>
+              <a href="#" className='block hover:underline hover:text-red-200'>Services</a>
+            </div>
 
-          {/* Quick Links */}
-          <div className='space-y-1'>
-            <p className='text-xl font-bold mb-2'>Quick Links</p>
-            <a href="#" className='block hover:underline hover:text-red-200'>Contact Us</a>
-            <a href="#" className="block hover:underline hover:text-red-200">Blog</a>
-            <a href="#" className="block hover:underline hover:text-red-200">Pricing</a>
-            <a href="#" className="block hover:underline hover:text-red-200">FAQ</a>
+            <div className='space-y-1'>
+              <p className='text-xl font-bold mb-2'>Quick Links</p>
+              <a href="#" className='block hover:underline hover:text-red-200'>Contact Us</a>
+              <a href="#" className="block hover:underline hover:text-red-200">Blog</a>
+              <a href="#" className="block hover:underline hover:text-red-200">Pricing</a>
+              <a href="#" className="block hover:underline hover:text-red-200">FAQ</a>
+            </div>
           </div>
 
           {/* Contact and Work Hours */}
-          <div>
+          <div className='lg:ml-auto'>
             <p className='text-xl font-bold mb-2'>Contact & Hours</p>
             <div className='flex items-center gap-2 text-sm'>
               <Clock size={20} />
@@ -90,9 +92,9 @@ const Footer = () => {
         <hr className='mt-6 border-red-400' />
 
         {/* Copyright Section */}
-        <div className='flex items-center justify-center gap-2 mt-3 text-sm'>
+        <div className='flex flex-col sm:flex-row items-center justify-center gap-2 mt-3 text-sm'>
           <Copyright size={18} />
-          <p>2024 - Developed by Sahil Mane - All Rights Reserved</p>
+          <p>{currentYear} - Developed by Sahil Mane - All Rights Reserved</p>
         </div>
       </footer>
     </div>

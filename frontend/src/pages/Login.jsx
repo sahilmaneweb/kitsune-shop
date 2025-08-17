@@ -30,10 +30,9 @@ const Login = () => {
         }
         const result = await login(email, password);
         
-        if (result.success) {
-          toast.success(result.message);
+        if (result?.success) {
+          toast.success(result?.message);
         } else {
-          toast.error(result.message);
           setEmail('');
           setPassword('');
         }
@@ -45,15 +44,15 @@ const Login = () => {
         const data = { name: `${fname} ${lname}`, email, password };
         const response = await api.post("/user/registerUser", data);
 
-        if (response.data.success) {
-          toast.success(response.data.message || "Registration successful! Please check your email for verification.");
+        if (response?.data.success) {
+          toast.success(response?.data.message || "Registration successful! Please check your email for verification.");
           setEmail('');
           setPassword('');
           setFname('');
           setLname('');
           setState('Login');
         } else {
-          toast.error(response.data.message || "Registration failed.");
+          toast.error(response?.data.message || "Registration failed.");
         }
       }
     } catch (error) {

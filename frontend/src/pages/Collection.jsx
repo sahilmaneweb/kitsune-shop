@@ -111,7 +111,7 @@ const Collection = () => {
 
       {/* Products Section */}
       <section className='w-full md:w-10/12'>
-        <div className='text-xl sm:text-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center font-semibold border-b-4 border-slate-300 pb-2 gap-2'>
+        <div className='text-xl sm:text-2xl flex flex-row justify-between items-start sm:items-center font-semibold border-b-4 border-slate-300 pb-2 gap-2'>
           <h1>Collections ({filteredProducts.length})</h1>
           <div className='flex items-center gap-2'>
             <select value={sortType} onChange={(e) => setSortType(e.target.value)} className='text-lg border-2 border-red-600 focus:outline-none cursor-pointer p-1 rounded-md'>
@@ -126,7 +126,7 @@ const Collection = () => {
         </div>
 
         {filteredProducts.length > 0 ? (
-          <div className='mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+          <div className='mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
             {filteredProducts.map((item) => (
               <ProductCard 
                 key={item._id}

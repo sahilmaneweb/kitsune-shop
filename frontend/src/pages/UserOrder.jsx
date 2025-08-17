@@ -65,7 +65,7 @@ const UserOrder = () => {
                                 <h1 className='text-lg font-semibold'>Order ID: {order._id}</h1>
                                 {getStatusBadge(order.status)}
                             </div>
-                            <h2 className='text-md text-gray-600'>Date: {new Date(order.date).toLocaleDateString()}</h2>
+                            <h2 className='text-md text-gray-600'>Date: {new Date(order.date).toLocaleDateString('en-GB')}</h2>
                         </div>
                         
                         {/* Order Details */}
@@ -84,7 +84,7 @@ const UserOrder = () => {
                                 <h3 className='text-lg font-semibold text-red-600'>Items ({order.items.length})</h3>
                                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2'>
                                     {order.items.map((item) => (
-                                        <div key={item.productId} className='flex items-center gap-2 p-2 border border-red-100 rounded-md bg-white'>
+                                        <div key={`${item.productId}-${item.size}`} className='flex items-center gap-2 p-2 border border-red-100 rounded-md bg-white'>
                                             <img src={item.imageUrl} alt={item.name} className='size-12 rounded-md object-cover' />
                                             <div className='text-sm'>
                                                 <p className='font-medium text-red-700'>{item.name}</p>

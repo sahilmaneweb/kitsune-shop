@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import api from "../../services/api";
+import api from "../services/api";
+import CustomCartToast from "../components/CustomCartToast";
 
 const ShopContext = createContext();
 
@@ -8,7 +9,7 @@ export const useShopContext = () => useContext(ShopContext);
 
 export const ShopContextProvider = ({ children }) => {
     // Authentication States
-    const [userToken, setUserToken] = useState(null);
+    const [userToken, setUserToken] = useState(localStorage.getItem('kitsuneUserToken') || null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -42,10 +43,10 @@ export const ShopContextProvider = ({ children }) => {
                 localStorage.setItem('kitsuneUserToken', token);
                 setUserToken(token);
                 setIsAuthenticated(true);
-                toast.success('Logged in successfully!');
             } else {
                 toast.error(response.data.message);
             }
+            return response.data;
         } catch (error) {
             toast.error(error.response?.data?.message || 'Login failed.');
         }
@@ -69,6 +70,7 @@ export const ShopContextProvider = ({ children }) => {
             setLoading(false);
             return;
         }
+        console.log("Verifying user with token:", token);
         try {
             await api.get('/user/verifyUser');
             setUserToken(token);
@@ -85,116 +87,121 @@ export const ShopContextProvider = ({ children }) => {
     };
 
     // --- Cart Functions ---
-    const loadCart = async () => {
-        if (!userToken) return;
-        try {
-            const response = await api.get('/cart/getCart');
-            if (response.data.success) {
-                setCartItems(response.data.items);
-            }
-        } catch (error) {
-            console.error('Failed to load cart:', error);
-        }
-    };
+  // --- Cart Functions ---
 
-    const addToCart = async (productId, size, quantity) => {
-        if (!isAuthenticated) {
-            toast.error("Please log in to add items to your cart.");
-            return;
-        }
-        const data = { productId, size, quantity };
-        try {
-            const response = await api.post('/cart/addToCart', data);
-            if (response.data.success) {
-                // The API sends the updated item
-                const updatedItem = response.data.item;
-                setCartItems(prevItems => {
-                    // Check if the item already exists in the local state to update it
-                    const existingItemIndex = prevItems.findIndex(item => item.productId._id === updatedItem.productId._id && item.size === updatedItem.size);
-                    if (existingItemIndex !== -1) {
-                        const newItems = [...prevItems];
-                        newItems[existingItemIndex] = updatedItem;
-                        return newItems;
-                    }
-                    return [...prevItems, updatedItem];
-                });
-                toast.success(response.data.message);
-            } else {
-                toast.error(response.data.message);
-            }
-        } catch (error) {
-            toast.error('Failed to add product.');
-        }
-    };
-
-    const updateCartQuantity = async (productId, size, operation) => {
-        if (!isAuthenticated) return;
-        const data = { productId, size, operation };
-        try {
-            const response = await api.patch('/cart/updateCartQuantity', data);
-            if (response.data.success) {
-                // The API sends back the updated item
-                const updatedItem = response.data.item;
-                if (updatedItem) {
-                    setCartItems(prevItems =>
-                        prevItems.map(item =>
-                            (item.productId._id === updatedItem.productId._id && item.size === updatedItem.size) ? updatedItem : item
-                        )
-                    );
-                    toast.success("Quantity updated successfully.");
-                } else {
-                    // If the item was removed (quantity became 0)
-                    setCartItems(prevItems =>
-                        prevItems.filter(item =>
-                            !(item.productId._id === productId && item.size === size)
-                        )
-                    );
-                    toast.success("Item removed from cart.");
-                }
-            } else {
-                toast.error("Failed to update quantity.");
-            }
-        } catch (error) {
-            toast.error('Failed to update quantity.');
-        }
-    };
-
-    const removeFromCart = async (productId, size) => {
-        if (!isAuthenticated) return;
-        try {
-            // Axios.delete with a request body needs a special config object
-            const response = await api.delete('/cart/removeFromCart', { data: { productId, size } });
-            if (response.data.success) {
-                setCartItems(prevItems => prevItems.filter(item => !(item.productId._id === productId && item.size === size)));
-                toast.success("Product removed from cart.");
-            } else {
-                toast.error("Failed to remove product.");
-            }
-        } catch (error) {
-            toast.error('Failed to remove product.');
-        }
-    };
-
-    const clearCart = async() => {
-        if (!isAuthenticated) return;
-        try {
-            const response = await api.delete('/cart/clearCart');
-            if(response.data.success){
-                setCartItems([]);
-                toast.success(response.data.message);
-            }else{
-                toast.error(response.data.message);
-            }
-        } catch (error) {
-            toast.error('Failed to clear cart.');
-        }
+const loadCart = async () => {
+  if (!userToken) return;
+  try {
+    const response = await api.get('/cart/getCart');
+    if (response.data.success) {
+      setCartItems(response.data.items);
     }
+  } catch (error) {
+    console.error('Failed to load cart:', error);
+  }
+};
 
+const addToCart = async (productId, size, quantity) => {
+    if (!isAuthenticated) {
+        toast.error("Please log in to add items to your cart.");
+        return;
+    }
+    const data = { productId, size, quantity };
+    try {
+        const response = await api.post('/cart/addToCart', data);
+        if (response.data.success) {
+            const updatedItem = response.data.item;
+            setCartItems(prevItems => {
+                if (!prevItems) return [updatedItem];
+                const existingItemIndex = prevItems.findIndex(item => item.productId._id === updatedItem.productId._id && item.size === updatedItem.size);
+                if (existingItemIndex !== -1) {
+                    const newItems = [...prevItems];
+                    newItems[existingItemIndex] = updatedItem;
+                    return newItems;
+                }
+                return [...prevItems, updatedItem];
+            });
+            
+            // Show custom toast with product details
+            toast.custom((t) => (
+                <CustomCartToast 
+                    productName={updatedItem.productId.name} 
+                    productImage={updatedItem.productId.productUrl} 
+                    message="Added to cart successfully!" 
+                    t={t} 
+                />
+            ));
+
+        } else {
+            toast.error(response.data.message);
+        }
+    } catch (error) {
+        toast.error('Failed to add product.');
+    }
+};
+const updateCartQuantity = async (productId, size, operation) => {
+  if (!isAuthenticated) return;
+  const data = { productId, size, operation };
+  try {
+    const response = await api.patch('/cart/updateCartQuantity', data);
+    if (response.data.success) {
+      const updatedItem = response.data.item;
+      if (updatedItem) {
+        setCartItems(prevItems =>
+          prevItems.map(item =>
+            (item.productId._id === productId && item.size === size) ? updatedItem : item
+          )
+        );
+      } else {
+        setCartItems(prevItems =>
+          prevItems.filter(item =>
+            !(item.productId._id === productId && item.size === size)
+          )
+        );
+        toast.success("Item removed from cart.");
+      }
+    } else {
+      toast.error(response.data.message);
+    }
+  } catch (error) {
+    toast.error('Failed to update quantity.');
+  }
+};
+
+const removeFromCart = async (productId, size) => {
+  if (!isAuthenticated) return;
+  try {
+    const response = await api.delete('/cart/removeFromCart', { data: { productId, size } });
+    if (response.data.success) {
+      setCartItems(prevItems => prevItems.filter(item => !(item.productId._id === productId && item.size === size)));
+      toast.success("Product removed from cart.");
+    } else {
+      toast.error("Failed to remove product.");
+    }
+  } catch (error) {
+    toast.error('Failed to remove product.');
+  }
+};
+
+const clearCart = async() => {
+  if (!isAuthenticated) return;
+  try {
+    const response = await api.delete('/cart/clearCart');
+    if(response.data.success){
+      setCartItems([]);
+      toast.success(response.data.message);
+    }else{
+      toast.error(response.data.message);
+    }
+  } catch (error) {
+    toast.error('Failed to clear cart.');
+  }
+}
     // --- Order Functions ---
     const loadUserOrders = async () => {
         if (!userToken) return;
         try {
-            const response = await api.get('/order/userOrders');
+            const response = await api.get('/order/getOrders');
             if (response.data.success) {
                 setUserOrders(response.data.data);
             }
@@ -221,8 +228,9 @@ export const ShopContextProvider = ({ children }) => {
 
     // --- UseEffects for initial load and state updates ---
     useEffect(() => {
+        
         verifyUser();
-    }, [userToken]);
+    }, []);
 
     useEffect(() => {
         if (cartItems) {

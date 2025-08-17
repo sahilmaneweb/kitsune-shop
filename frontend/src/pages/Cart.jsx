@@ -77,20 +77,20 @@ const Cart = () => {
                     {cartItems && cartItems.length > 0 ? (
                         <div className='space-y-4'>
                             {cartItems.map((item) => (
-                                <div key={item._id} className={`flex flex-col sm:flex-row gap-4 items-center sm:items-start p-4 rounded-md shadow-sm border border-red-200 bg-white ${!item.productId.isVisible ? 'opacity-70 bg-red-100' : ''}`}>
+                                <div key={item._id} className={`flex flex-row gap-4 items-center p-4 rounded-md shadow-sm border border-red-200 bg-white ${!item.productId.isVisible ? 'opacity-70 bg-red-100' : ''}`}>
                                     <Link to={`/collection/${item.productId._id}`} className='flex-shrink-0'>
                                         <img src={item.productId.productUrl} className='size-20 rounded-md object-cover' alt={item.productId.name} />
                                     </Link>
-                                    <div className='flex-grow text-lg text-center sm:text-left'>
+                                    <div className='flex-grow text-lg'>
                                         <h1 className='text-xl font-semibold text-red-700'>{item.productId.name}</h1>
                                         <p className='text-sm text-gray-600'>Category: {item.productId.category}</p>
                                         <p className='text-sm font-bold text-red-600'>Size: {item.size}</p>
-                                        <div className='flex items-center gap-1 mt-1 justify-center sm:justify-start'>
+                                        <div className='flex items-center gap-1 mt-1'>
                                             <IndianRupee size={16} className='text-red-600' />
                                             <h2 className='text-red-600 font-bold'>{item.productId.offerPrice}</h2>
                                         </div>
                                     </div>
-                                    <div className='flex flex-col items-center sm:items-end gap-2 mt-2 sm:mt-0'>
+                                    <div className='flex flex-row items-center gap-2 mt-2 sm:mt-0'>
                                         {item.productId.isVisible ? (
                                             <>
                                                 <div className='inline-flex gap-2 items-center justify-between rounded-md shadow-sm border border-black p-1 text-red-600'>
@@ -100,12 +100,15 @@ const Cart = () => {
                                                     <span className='select-none text-lg font-semibold w-6 text-center text-black'>
                                                         {item.quantity}
                                                     </span>
-                                                    <span className='select-none cursor-pointer' onClick={() => handleUpdateQuantity(item, 'increment')}>
+                                                    <span 
+                                                        className={`select-none cursor-pointer ${item.quantity >= 9 ? 'text-gray-400' : ''}`} 
+                                                        onClick={() => item.quantity < 9 ? handleUpdateQuantity(item, 'increment') : null}
+                                                    >
                                                         <CirclePlus size={20} />
                                                     </span>
                                                 </div>
                                                 <button type='button' onClick={() => handleRemoveProduct(item)} className='text-red-600 font-semibold hover:text-red-900 underline flex items-center gap-1'>
-                                                    <Trash2 size={16} /> Remove
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </>
                                         ) : (

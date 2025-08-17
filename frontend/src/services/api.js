@@ -10,9 +10,7 @@ const api = axios.create({
 
 const publicRoutes = [
   '/user/loginUser',
-  '/user/registerUser',
-  '/user/verify', // For email verification link
-  '/user/verifyUser', // For client-side token verification on app load
+  '/user/registerUser',, // For email verification link, // For client-side token verification on app load
   '/product/allProduct', // To fetch all products (e.g., on home/collection page)
   '/product/getProduct/', // To fetch individual product details (dynamic route)
 ];
