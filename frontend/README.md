@@ -1,7 +1,9 @@
-
 # 🦊 Kitsune Shop Frontend
 
 Welcome to **Kitsune Shop** – a modern anime merchandise e-commerce site built with React, Vite, and TailwindCSS! 🚀
+
+## 🌐 Live Deployment
+Check out the live site here: [kitsune-shop-five.vercel.app](https://kitsune-shop-five.vercel.app/)
 
 ## ✨ Features
 
@@ -110,5 +112,5 @@ All API requests use the base URL from `VITE_SERVER_URL`. User tokens are stored
 MIT
 
 ---
-
-Made with ❤️ by Kitsune Shop
+Made with ❤️ by [Sahil Mane](https://github.com/sahilmaneweb)
+GitHub: [https://github.com/sahilmaneweb](https://github.com/sahilmaneweb)

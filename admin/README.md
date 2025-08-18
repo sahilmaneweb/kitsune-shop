@@ -1,6 +1,6 @@
 # 🦊 Kitsune Shop Admin Dashboard
 
-![Kitsune Logo](public/kitsune-logo.png)
+> **Live Demo:** [https://kitsune-shop-admin.vercel.app/](https://kitsune-shop-admin.vercel.app/)
 
 > **Tags:** #React #Vite #TailwindCSS #AdminPanel #Ecommerce #Dashboard #ProtectedRoutes #RESTAPI #JWT #Axios #Zod
 
@@ -211,6 +211,6 @@ MIT
 
 ## 👨‍💻 Author
 
-Made with ❤️ by Sahil Mane
+Made with ❤️ by [Sahil Mane](https://github.com/sahilmaneweb)
 
 ---

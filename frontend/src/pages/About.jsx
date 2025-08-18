@@ -46,9 +46,9 @@ const About = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const socialLinks = {
-    github: "https://github.com/your-github",
-    instagram: "https://instagram.com/your-instagram",
-    linkedin: "https://linkedin.com/in/your-linkedin",
+    github: "https://github.com/sahilmaneweb",
+    instagram: "https://instagram.com/sahil_mane_1304",
+    linkedin: "https://linkedin.com/in/sahil-mane-b113032ba",
   };
 
   const nextSlide = () => {

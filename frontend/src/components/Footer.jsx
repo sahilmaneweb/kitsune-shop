@@ -1,13 +1,12 @@
 import React from 'react';
 import logo from '../assets/kitsune-logo.png';
-import { Clock, Copyright, Facebook, Github, Instagram, Linkedin, Phone, Mail } from 'lucide-react';
+import { Clock, Copyright, Github, Instagram, Linkedin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
   const socialLinks = {
-    instagram: "https://www.instagram.com",
-    github: "https://www.github.com",
-    facebook: "https://www.facebook.com",
-    linkedin: "https://www.linkedin.com",
+    instagram: "https://www.instagram.com/sahil_mane_1304",
+    github: "https://github.com/sahilmaneweb",
+    linkedin: "https://www.linkedin.com/in/sahil-mane-b113032ba",
   };
 
   const currentYear = new Date().getFullYear();
@@ -50,7 +49,7 @@ const Footer = () => {
             <div className='flex items-center justify-start gap-3'>
               <a href={socialLinks.instagram} aria-label="Instagram" className='hover:text-red-300 transition-colors'><Instagram size={28} /></a>
               <a href={socialLinks.github} aria-label="GitHub" className='hover:text-red-300 transition-colors'><Github size={28} /></a>
-              <a href={socialLinks.facebook} aria-label="Facebook" className='hover:text-red-300 transition-colors'><Facebook size={28} /></a>
+              
               <a href={socialLinks.linkedin} aria-label="LinkedIn" className='hover:text-red-300 transition-colors'><Linkedin size={28} /></a>
             </div>
           </div>

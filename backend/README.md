@@ -9,6 +9,15 @@
 ![EJS](https://img.shields.io/badge/EJS-3.x-red)
 ![JWT](https://img.shields.io/badge/JWT-9.x-lightgrey)
 
+---
+
+## 🌐 Live Server
+
+**Deployment:**  
+[https://kitsune-shop-server.vercel.app/](https://kitsune-shop-server.vercel.app/)
+
+---
+
 ## ✨ Features
 
 - 🛒 Cart management (add, update, remove, clear)
@@ -18,10 +27,11 @@
 - 📝 Product reviews (with rating & message)
 - 📦 Order placement, confirmation, cancellation
 - 📊 Admin dashboard stats (products, orders, revenue)
-- 🧾 PDF invoice generation (Puppeteer)
 - 📧 Email notifications (Nodemailer)
 - 🧪 Input validation (Zod)
 - 🌐 RESTful API structure
+
+---
 
 ## 🗂️ Project Structure
 
@@ -60,10 +70,11 @@ validators/
   userValidator.js
 views/
   emailVerificationTemplate.ejs
-  invoice.ejs
   verificationError.ejs
   verificationSuccess.ejs
 ```
+
+---
 
 ## 🔑 Environment Variables (`.env.local`)
 
@@ -80,6 +91,8 @@ views/
 | `IMAGEKIT_PRIVATE_KEY`  | ImageKit private key              |
 | `IMAGEKIT_URL_ENDPOINT` | ImageKit URL endpoint             |
 | `CLIENT_BASE_URL`       | Frontend base URL                 |
+
+---
 
 ## 🧩 Models Overview
 
@@ -121,6 +134,8 @@ views/
 - `rating`: Number (1-5), required
 - `message`: String, required (min 10 chars)
 
+---
+
 ## 🚀 Getting Started
 
 1. **Clone the repo**
@@ -147,6 +162,8 @@ views/
 5. **API Endpoints**
    - See routers: [`router/productRouter.js`](router/productRouter.js), [`router/userRouter.js`](router/userRouter.js), [`router/cartRouter.js`](router/cartRouter.js), [`router/orderRouter.js`](router/orderRouter.js)
 
+---
+
 ## 🛠️ Tech Stack
 
 - Node.js, Express.js
@@ -156,7 +173,8 @@ views/
 - ImageKit for image hosting
 - Nodemailer for emails
 - EJS for server-side views
-- Puppeteer for PDF generation
+
+---
 
 ## 📄 License
 
@@ -164,4 +182,4 @@ MIT
 
 ---
 
-> Made with ❤️ for Kitsune Shop!
+> Made with ❤️ by [Sahil Mane](https://github.com/sahilmaneweb)
