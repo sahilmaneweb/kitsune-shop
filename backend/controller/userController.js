@@ -97,9 +97,6 @@ export const verifyUser = async (req, res) => {
     const newUser = new userModel({ name, email, password });
     await newUser.save();
 
-    
-    const newCart = new cartModel({ userId: newUser._id });
-    await newCart.save();
 
     
     res.render('verificationSuccess', {

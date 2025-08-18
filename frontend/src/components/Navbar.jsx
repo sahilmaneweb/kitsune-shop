@@ -18,7 +18,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout(); // Call logout from context
-    toast.success("Logged out successfully!");
+    
   };
 
   return (

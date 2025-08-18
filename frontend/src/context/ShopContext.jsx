@@ -211,20 +211,23 @@ const clearCart = async() => {
     };
 
     const addOrder = async (orderData) => {
-        if (!isAuthenticated || cartItems.length === 0) return;
-        try {
-            const response = await api.post('/order/addOrder', orderData);
-            if (response.data.success) {
-                setUserOrders(prevOrders => [response.data.order, ...prevOrders]);
-                setCartItems([]);
-                toast.success(response.data.message);
-            } else {
-                toast.error(response.data.message);
-            }
-        } catch (error) {
-            toast.error('Failed to place order.');
+    if (!isAuthenticated || !cartItems || cartItems.length === 0) return;
+    try {
+        const response = await api.post('/order/addOrder', orderData);
+        if (response.data.success) {
+            setUserOrders(prevOrders => [response.data.order, ...(prevOrders || [])]); // <-- Fix is here
+            setCartItems([]);
+            toast.success(response.data.message);
+            return response.data;
+        } else {
+            toast.error(response.data.message);
+            return response.data;
         }
-    };
+    } catch (error) {
+        toast.error('Failed to place order.');
+        return error.response.data;
+    }
+};
 
     // --- UseEffects for initial load and state updates ---
     useEffect(() => {

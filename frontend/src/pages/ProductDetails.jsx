@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { CircleMinus, CirclePlus, IndianRupee, ShoppingBag, Star, StarHalf } from 'lucide-react';
+import { CircleMinus, CirclePlus, IndianRupee, ShoppingBag, Star } from 'lucide-react';
 import { useShopContext } from '../context/ShopContext';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import Reviews from '../components/Reviews';
+import ProductImageSlider from '../components/ProductImageSlider'; // Import the new component
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -16,7 +18,6 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('S');
 
-  // Helper function to format the category string
   const formatCategory = (cat) => {
     if (!cat) return '';
     const parts = cat.split('-');
@@ -69,16 +70,17 @@ const ProductDetails = () => {
 
   return (
     <div className='p-4 container mx-auto'>
-      <section className='grid grid-cols-1 sm:grid-cols-2 gap-8 my-6'>
+      <section className='flex flex-col sm:flex-row gap-8 my-6'>
         {/* Product Image Section */}
-        <div className='flex flex-col gap-4'>
-          <div className='rounded-lg overflow-hidden shadow-md'>
-            <img src={product.productUrl} alt={product.name} className='w-full h-auto object-cover' />
+        <div className='flex flex-col gap-4 items-center sm:items-start w-full sm:w-1/2 lg:w-2/5'>
+          {/* Use the new ProductImageSlider component */}
+          <div className='relative w-full rounded-lg shadow-md max-w-xl mx-auto sm:mx-0'>
+            <ProductImageSlider imageUrl={product.productUrl} productName={product.name} />
           </div>
         </div>
 
         {/* Product Details and Controls */}
-        <div className='space-y-4'>
+        <div className='space-y-4 w-full sm:w-1/2 lg:w-3/5'>
           <h2 className='text-xl font-semibold text-red-600 capitalize'>{formatCategory(product.category)}</h2>
           <h1 className='text-4xl font-bold'>{product.name}</h1>
           <p className='text-lg text-gray-700 leading-relaxed'>{product.description}</p>
@@ -149,44 +151,7 @@ const ProductDetails = () => {
         </div>
       </section>
 
-      {/* Reviews Section */}
-      <section className='mt-12 py-8 border-t border-red-200'>
-        <h2 className='text-3xl font-bold text-red-600 mb-6'>Customer Reviews</h2>
-        <div className='space-y-6'>
-          <div className='p-6 bg-red-50 rounded-lg shadow-sm'>
-            <div className='flex items-center gap-2 mb-2'>
-              <p className='font-semibold text-lg'>Jane Doe</p>
-              <span className='text-sm text-gray-500'>- August 15, 2024</span>
-            </div>
-            <p className='text-red-500 flex gap-1'>
-              <Star size={16} fill="currentColor" />
-              <Star size={16} fill="currentColor" />
-              <Star size={16} fill="currentColor" />
-              <Star size={16} fill="currentColor" />
-              <Star size={16} />
-            </p>
-            <p className='text-gray-700 mt-2'>
-              "The product quality exceeded my expectations. The colors are vibrant and the fit is perfect!"
-            </p>
-          </div>
-          <div className='p-6 bg-red-50 rounded-lg shadow-sm'>
-            <div className='flex items-center gap-2 mb-2'>
-              <p className='font-semibold text-lg'>John Smith</p>
-              <span className='text-sm text-gray-500'>- July 28, 2024</span>
-            </div>
-            <p className='text-red-500 flex gap-1'>
-              <Star size={16} fill="currentColor" />
-              <Star size={16} fill="currentColor" />
-              <Star size={16} fill="currentColor" />
-              <Star size={16} />
-              <Star size={16} />
-            </p>
-            <p className='text-gray-700 mt-2'>
-              "A great design, but shipping took a little longer than expected. Overall, I'm happy with my purchase."
-            </p>
-          </div>
-        </div>
-      </section>
+      <Reviews productId={id} />
     </div>
   );
 };

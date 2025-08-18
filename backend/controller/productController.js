@@ -156,3 +156,54 @@ export const toggleProductVisibility = async (req, res) => {
     });
   }
 };
+
+
+import Review from '../model/reviewModel.js';
+import { ZodError, z } from 'zod';
+
+// Zod validator for new reviews
+const reviewValidator = z.object({
+    productId: z.string().nonempty('Product ID is required'),
+    rating: z.number().int().min(1).max(5, 'Rating must be between 1 and 5'),
+    message: z.string().min(10, 'Review message must be at least 10 characters long'),
+});
+
+// Get all reviews for a specific product
+export const getReviewsByProductId = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const reviews = await Review.find({ productId }).sort({ createdAt: -1 });
+
+        res.status(200).json({ success: true, reviews });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch reviews.' });
+    }
+};
+
+// Add a new review
+export const addReview = async (req, res) => {
+    try {
+        const { productId, rating, message } = req.body;
+        const userId = req.user.id;
+        const userName = req.user.name; // Assuming user's name is in the token payload
+
+        const validatedData = reviewValidator.parse({ productId, rating: Number(rating), message });
+        
+        const newReview = new Review({
+            productId: validatedData.productId,
+            userId,
+            userName,
+            rating: validatedData.rating,
+            message: validatedData.message,
+        });
+
+        await newReview.save();
+
+        res.status(201).json({ success: true, message: 'Review submitted successfully!', review: newReview });
+    } catch (error) {
+        if (error instanceof ZodError) {
+            return res.status(400).json({ success: false, message: error.errors[0].message });
+        }
+        res.status(500).json({ success: false, message: 'Failed to submit review.' });
+    }
+};

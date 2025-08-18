@@ -3,6 +3,9 @@ import toast from 'react-hot-toast';
 import { useShopContext } from '../context/ShopContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { Eye, EyeOff } from 'lucide-react'; 
+
+import { userLoginValidatorFrontend, userRegisterValidatorFrontend } from '../validators/userFrontendValidator';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +15,8 @@ const Login = () => {
   const [lname, setLname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -21,45 +26,53 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+
+    let validationResult;
+    let formData;
+
+    if (state === 'Login') {
+      formData = { email, password };
+      validationResult = userLoginValidatorFrontend.safeParse(formData);
+    } else if (state === 'Register') {
+      formData = { fname, lname, email, password };
+      validationResult = userRegisterValidatorFrontend.safeParse(formData);
+    }
+
+    if (!validationResult.success) {
+      const fieldErrors = validationResult.error.flatten().fieldErrors;
+      setErrors(fieldErrors);
+      toast.error("Please correct the form errors.");
+      return;
+    }
 
     try {
       if (state === 'Login') {
-        if (!email || !password) {
-          toast.error("Email and password fields should be filled.");
-          return;
-        }
         const result = await login(email, password);
-        
-        if (result?.success) {
-          toast.success(result?.message);
-        } else {
+        if (!result.success) {
+          toast.error(result.message);
           setEmail('');
           setPassword('');
         }
       } else if (state === 'Register') {
-        if (!fname || !lname || !email || !password) {
-          toast.error("All input fields should be filled.");
-          return;
-        }
-        const data = { name: `${fname} ${lname}`, email, password };
-        const response = await api.post("/user/registerUser", data);
+        const dataToSend = { name: `${fname} ${lname}`, email, password };
+        const response = await api.post("/user/registerUser", dataToSend);
 
-        if (response?.data.success) {
-          toast.success(response?.data.message || "Registration successful! Please check your email for verification.");
+        if (response.data.success) {
+          toast.success(response.data.message || "Registration successful! Please check your email for verification.");
           setEmail('');
           setPassword('');
           setFname('');
           setLname('');
           setState('Login');
         } else {
-          toast.error(response?.data.message || "Registration failed.");
+          toast.error(response.data.message || "Registration failed.");
         }
       }
     } catch (error) {
       console.error("Submission error:", error);
       toast.error(error.response?.data?.message || "An unexpected error occurred. Please try again.");
       
-      // Clear input fields on any error
       setEmail('');
       setPassword('');
       setFname('');
@@ -76,20 +89,40 @@ const Login = () => {
           <div>
             <label htmlFor="fname" className='text-lg py-2 block text-gray-700 font-semibold'>First Name : </label>
             <input type="text" name="fname" id="fname" value={fname} onChange={(e) => setFname(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete="given-name" />
+            {errors.fname && errors.fname.map((err, index) => <p key={index} className="text-red-500 text-sm mt-1">{err}</p>)}
           </div>
           <div>
             <label htmlFor="lname" className='text-lg py-2 block text-gray-700 font-semibold'>Last Name : </label>
             <input type="text" name="lname" id="lname" value={lname} onChange={(e) => setLname(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete="family-name" />
+            {errors.lname && errors.lname.map((err, index) => <p key={index} className="text-red-500 text-sm mt-1">{err}</p>)}
           </div>
         </section>
 
         <div className='mt-4'>
           <label htmlFor="email" className='text-lg py-2 block text-gray-700 font-semibold'>Email : </label>
           <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete="email" />
+          {errors.email && errors.email.map((err, index) => <p key={index} className="text-red-500 text-sm mt-1">{err}</p>)}
         </div>
-        <div className='mt-4'>
+        <div className='mt-4'> {/* No longer a relative container */}
           <label htmlFor="password" className='text-lg py-2 block text-gray-700 font-semibold'>Password : </label>
-          <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className='border-2 w-full rounded-md focus:outline-none focus:ring-2 p-2 text-[16px] focus:ring-red-300' autoComplete={state === 'Login' ? 'current-password' : 'new-password'} />
+          <div className='flex items-center border-2 rounded-md focus-within:ring-2 focus-within:ring-red-300 focus-within:border-red-600'> {/* The new flex container */}
+            <input 
+              type={showPassword ? "text" : "password"}
+              name="password" 
+              id="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              className='flex-grow p-2 text-[16px] rounded-l-md focus:outline-none' // Flex-grow for the input
+              autoComplete={state === 'Login' ? 'current-password' : 'new-password'} 
+            />
+            <span 
+              className='px-3 cursor-pointer text-gray-500 hover:text-gray-700'
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </span>
+          </div>
+          {errors.password && errors.password.map((err, index) => <p key={index} className="text-red-500 text-sm mt-1">{err}</p>)}
         </div>
         
         {state === 'Register' && (
