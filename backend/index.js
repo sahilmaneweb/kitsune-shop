@@ -3,6 +3,7 @@ import './config/envConfig.js';  // Load env variables FIRST
 import express, { json, urlencoded } from 'express';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import connectDB from './config/db.js';
 
@@ -15,8 +16,13 @@ app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-app.set("view engine", "ejs");
-app.set("views", path.join(process.cwd(), "views"));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 
 app.get("/", (req, res) => {
     res.send("Kitsune Server Running Successfully");
