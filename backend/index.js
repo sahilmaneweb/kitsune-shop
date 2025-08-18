@@ -18,6 +18,10 @@ app.use(urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "views"));
 
+app.get("/", (req, res) => {
+    res.render("Kitsune Server Running Successfully");
+});
+
 import productRoute from './router/productRouter.js';
 import userRoute from './router/userRouter.js';
 import cartRoute from './router/cartRouter.js';
