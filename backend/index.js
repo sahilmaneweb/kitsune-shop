@@ -19,7 +19,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "views"));
 
 app.get("/", (req, res) => {
-    res.render("Kitsune Server Running Successfully");
+    res.send("Kitsune Server Running Successfully");
 });
 
 import productRoute from './router/productRouter.js';
