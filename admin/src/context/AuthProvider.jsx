@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const loginUser = async (email, password) => {
+  const loginAdmin = async (email, password) => {
     try {
       const response = await api.post('/user/loginAdmin', { email, password });
       
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     verifyToken();
   }, [navigate]);
 
-  const value = { isAuthenticated, loading, loginUser, logout };
+  const value = { isAuthenticated, loading, loginAdmin, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

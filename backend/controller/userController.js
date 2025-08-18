@@ -191,8 +191,8 @@ export const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
     // Hardcoded admin credentials
     const adminCredentials = {
-      email: "admin@shop.com",
-      password: "Admin@123" // ideally, store hashed in env or DB
+      email: process.env.ADMIN_MAIL,
+      password: process.env.ADMIN_PASSWORD // ideally, store hashed in env or DB
     };
 
     // Check email

@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthProvider';
-import api from '../../services/api';
+import { Eye, EyeOff } from 'lucide-react'; 
+import { adminLoginValidatorFrontend } from '../../validators/adminFrontendValidators';
+
 
 function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { isAuthenticated, loginUser } = useAuth();
+  const { isAuthenticated, loginAdmin } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -18,7 +22,18 @@ function AdminLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const result = await loginUser(email, password);
+    setErrors({});
+    
+    const validationResult = adminLoginValidatorFrontend.safeParse({ email, password });
+    
+    if (!validationResult.success) {
+      const fieldErrors = validationResult.error.flatten().fieldErrors;
+      setErrors(fieldErrors);
+      toast.error("Please correct the form errors.");
+      return;
+    }
+    
+    const result = await loginAdmin(email, password);
     
     if (result.success) {
       toast.success(result.message);
@@ -33,7 +48,7 @@ function AdminLogin() {
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100'>
       <div className='p-8 mx-auto shadow-xl rounded-sm bg-white w-full max-w-lg'>
         <h1 className='text-2xl border-b-2 pb-2 pl-2 shadow-sm text-red-600 font-bold'>Admin Login</h1>
-        <form onSubmit={handleLogin} className='mt-6'>
+        <form onSubmit={handleLogin} className='mt-6' autoComplete="off">
           <div className='w-full px-3'>
             <label htmlFor="email" className='text-lg block my-2 text-red-600 font-semibold'>Email</label>
             <input 
@@ -44,20 +59,32 @@ function AdminLogin() {
               onChange={(e) => setEmail(e.target.value)} 
               className='block w-full text-md border-2 py-2 px-3 border-red-300 rounded-md focus:outline-none focus:border-red-600' 
               required
+              autoComplete="email" 
             />
+            {errors.email && errors.email.map((err, index) => <p key={index} className="text-red-500 text-sm mt-1">{err}</p>)}
           </div>
 
           <div className='w-full px-3 mt-4'>
             <label htmlFor="password" className='text-lg block my-2 text-red-600 font-semibold'>Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              name="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              className='block w-full text-md border-2 py-2 px-3 border-red-300 rounded-md focus:outline-none focus:border-red-600' 
-              required
-            />
+            <div className='relative'>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                name="password" 
+                id="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className='block w-full text-md border-2 py-2 px-3 border-red-300 rounded-md focus:outline-none focus:border-red-600 pr-10' 
+                required
+                autoComplete="current-password" 
+              />
+              <span 
+                className='absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700'
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
+            </div>
+            {errors.password && errors.password.map((err, index) => <p key={index} className="text-red-500 text-sm mt-1">{err}</p>)}
           </div>
 
           <section className='px-3 mt-6'>
@@ -76,6 +103,6 @@ function AdminLogin() {
       </footer>
     </div>
   );
-};
+}
 
 export default AdminLogin;

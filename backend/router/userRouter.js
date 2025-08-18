@@ -18,4 +18,14 @@ userRoute.post("/loginAdmin", loginAdmin);
 // --- Admin-specific protected routes ---
 userRoute.get("/verifyAdmin", authAdmin, verifyAdmin); 
 userRoute.get("/admin/dashboardStats", authAdmin, getDashboardStats);  
+
+userRoute.get("/preview", (req, res) => {
+    res.status(500).render('verificationError', {
+      title: 'Server Error',
+      message: 'Internal Server Error. Please try again later.',
+      error: "This error happended",
+      baseUrl: process.env.CLIENT_BASE_URL
+    });
+});
+
 export default userRoute;

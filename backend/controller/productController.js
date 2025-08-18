@@ -1,5 +1,6 @@
+import { ZodError, z } from 'zod';
 import productModel from '../model/productModel.js';
-import fs from 'fs';
+import Review from '../model/reviewModel.js';
 import imagekit from '../config/imagekitConfig.js';
 import { productValidator } from '../validators/productValidator.js';
 
@@ -158,8 +159,6 @@ export const toggleProductVisibility = async (req, res) => {
 };
 
 
-import Review from '../model/reviewModel.js';
-import { ZodError, z } from 'zod';
 
 // Zod validator for new reviews
 const reviewValidator = z.object({
